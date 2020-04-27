@@ -9,10 +9,10 @@
 
 Model *model        = NULL;
 
-const int width  = 800;
-const int height = 800;
+const int width  = 256;
+const int height = 256;
 
-Vec3f light_dir(  1,  1,  1 );
+Vec3f light_dir(  0,  10,  10 );
 Vec3f       eye( 50, 50, 50 );
 Vec3f    center( 0.5,   1.0,  0.5 );
 Vec3f        up( 0,   1,  0 );

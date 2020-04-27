@@ -174,13 +174,6 @@ bool Image::read_from_file(const char *filename) {
     data = new unsigned char[nbytes];
     memcpy(data, pixel_data, nbytes);
 
-    //~ for (unsigned long n = 0; n < nbytes; n += 4u) {
-        //~ data[n + 0] = pixel_data[n + 2];
-        //~ data[n + 1] = pixel_data[n + 1];
-        //~ data[n + 2] = pixel_data[n + 0];
-        //~ data[n + 3] = pixel_data[n + 3];
-    //~ }
-
     for (unsigned int n = 0; n < 32; n++) {
         unsigned char c = data[n];
         putc(hex_digits[c >> 4], stdout);

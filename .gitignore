@@ -1,5 +1,4 @@
 TinyRenderer
-framebuffer.*
 *.o
 *.d
 *.a
