@@ -7,15 +7,15 @@
 #include "geometry.h"
 #include "render.h"
 
-Model *model        = NULL;
+Model *model = NULL;
 
-const int width  = 256;
-const int height = 256;
+const int width  = 800;
+const int height = 800;
 
-Vec3f light_dir(  0,  10,  10 );
-Vec3f       eye( 50, 50, 50 );
-Vec3f    center( 0.5,   1.0,  0.5 );
-Vec3f        up( 0,   1,  0 );
+Vec3f light_dir(1,3,2);
+Vec3f       eye(4,4,4);
+Vec3f    center(0.5,1.0,0.5);
+Vec3f        up(0,1,0);
 
 struct Shader : public IShader {
     mat<2,3,float> varying_uv;  // triangle uv coordinates, written by the vertex shader, read by the fragment shader
@@ -69,7 +69,7 @@ int main(int argc, char** argv) {
     float *zbuffer = new float[width*height];
     for (int i=width*height; i--; zbuffer[i] = -std::numeric_limits<float>::max());
 
-    Image frame(width, height, Image::RGB);
+    Image frame(width, height, Image::RGBA);
     lookat(eye, center, up);
     viewport(width/8, height/8, width*3/4, height*3/4);
     projection(-1.f/(eye-center).norm());

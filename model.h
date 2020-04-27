@@ -40,7 +40,7 @@ private:
     Image m_diffusemap;
     Image m_normalmap;
     //~ Image m_specularmap;
-    void load_texture(std::string filename, const char *suffix, Image &img);
+    void load_texture(std::string filename, const char *suffix, Image &img, const ImageColor color);
     bool load_obj_model(std::string filename);
 
 public:

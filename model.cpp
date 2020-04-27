@@ -91,8 +91,8 @@ Model::Model(const char *filename) {
     load_obj_model(filename);
 
     std::cerr << "# v# " << m_verts.size() << " f# "  << m_faces.size() << " vt# " << m_uv.size() << " vn# " << m_norms.size() << std::endl;
-    load_texture(filename, ".jpg", m_diffusemap);
-    //~ load_texture(filename, "_nm_tangent.png", m_normalmap);
+    load_texture(filename, ".png", m_diffusemap, ImageColor(128, 128, 128));
+    load_texture(filename, "_nm_tangent.png", m_normalmap, ImageColor(255, 128, 128));
     //~ load_texture(filename, "_spec.png", m_specularmap);
 }
 
@@ -121,12 +121,14 @@ Vec3f Model::vert(int iface, int nthvert) {
     return m_verts[m_faces[iface][nthvert][0]];
 }
 
-void Model::load_texture(std::string filename, const char *suffix, Image &img) {
+void Model::load_texture(std::string filename, const char *suffix, Image &img, const ImageColor color) {
     std::string texfile(filename);
     size_t dot = texfile.find_last_of(".");
-    if (dot!=std::string::npos) {
+    if (dot != std::string::npos) {
         texfile = texfile.substr(0,dot) + std::string(suffix);
-        std::cerr << "texture file " << texfile << " loading " << (img.read_from_file(texfile.c_str()) ? "ok" : "failed") << std::endl;
+        bool read_from_file = img.read_from_file(texfile.c_str());
+        std::cerr << "texture file " << texfile << " loading " << (read_from_file ? "ok" : "failed") << std::endl;
+        if (!read_from_file) img.set_to_color(color);
         img.flip_vertically();
     }
 }
@@ -137,19 +139,12 @@ ImageColor Model::diffuse(Vec2f uvf) {
 }
 
 Vec3f Model::normal(Vec2f uvf) {
-    if (m_normalmap.isEmpty()) {
-        Vec3f res;
-        res[0] = 1.0f;
-        res[1] = 1.0f;
-        res[2] = 1.0f;
-        return res;
-    }
-
     Vec2i uv(uvf[0]*m_normalmap.get_width(), uvf[1]*m_normalmap.get_height());
     ImageColor c = m_normalmap.get(uv[0], uv[1]);
     Vec3f res;
-    for (int i=0; i<3; i++)
+    for (int i=0; i<3; i++) {
         res[2-i] = (float)c[i]/255.f*2.f - 1.f;
+    }
     return res;
 }
 

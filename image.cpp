@@ -54,6 +54,9 @@ bool Image::set(int x, int y, ImageColor &c) {
         return false;
     }
     memcpy(data+(x+y*width)*bytespp, c.rgba, bytespp);
+    if (bytespp==4 && c.bytespp<4) {
+        data[(x+y*width)*bytespp+3] = 255;
+    }
     return true;
 }
 
@@ -115,10 +118,6 @@ void Image::clear() {
     memset((void *)data, 0, width*height*bytespp);
 }
 
-bool Image::isEmpty() {
-    return data == NULL;
-}
-
 bool Image::scale(int w, int h) {
     if (w<=0 || h<=0 || !data) return false;
     unsigned char *tdata = new unsigned char[w*h*bytespp];
@@ -156,6 +155,15 @@ bool Image::scale(int w, int h) {
     return true;
 }
 
+void Image::set_to_color(const ImageColor color) {
+    if (data) delete [] data;
+    width = height = 1;
+    bytespp = color.bytespp;
+    unsigned long nbytes = bytespp * width * height;
+    data = new unsigned char[nbytes];
+    memcpy(data, color.rgba, nbytes);
+}
+
 static const char hex_digits[] = "0123456789ABCDEF";
 
 bool Image::read_from_file(const char *filename) {
@@ -174,17 +182,17 @@ bool Image::read_from_file(const char *filename) {
     data = new unsigned char[nbytes];
     memcpy(data, pixel_data, nbytes);
 
-    for (unsigned int n = 0; n < 32; n++) {
-        unsigned char c = data[n];
-        putc(hex_digits[c >> 4], stdout);
-        putc(hex_digits[c & 15], stdout);
-        putc(' ', stdout);
-    }
-    puts("\n");
+    //~ for (unsigned int n = 0; n < 32; n++) {
+    //~     unsigned char c = data[n];
+    //~     putc(hex_digits[c >> 4], stdout);
+    //~     putc(hex_digits[c & 15], stdout);
+    //~     putc(' ', stdout);
+    //~ }
+    //~ puts("\n");
 
     stbi_image_free(pixel_data);
 
-    std::cerr << width << "x" << height << "/" << bytespp*8 << "\n";
+    //~ std::cerr << width << "x" << height << "/" << bytespp*8 << "\n";
     return true;
 }
 
