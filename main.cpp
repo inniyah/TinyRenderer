@@ -9,11 +9,11 @@
 
 Model *model = NULL;
 
-const int width  = 800;
-const int height = 800;
+const int width  = 350;
+const int height = 600;
 
 Vec3f light_dir(1,3,2);
-Vec3f       eye(4,4,4);
+Vec3f       eye(1e12,1e12,1e12);
 Vec3f    center(0.5,1.0,0.5);
 Vec3f        up(0,1,0);
 
@@ -71,7 +71,8 @@ int main(int argc, char** argv) {
 
     Image frame(width, height, Image::RGBA);
     lookat(eye, center, up);
-    viewport(width/8, height/8, width*3/4, height*3/4);
+    //~ viewport(width/8, height/8, width*3/4, height*3/4);
+    viewport(-width * 0.2, height * 0.092, height * 0.816, height * 0.816); // trial and error
     projection(-1.f/(eye-center).norm());
     light_dir = proj<3>((Projection*ModelView*embed<4>(light_dir, 0.f))).normalize();
 
