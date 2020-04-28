@@ -28,6 +28,7 @@ static Vec3f       eye(3,3,3);
 static Vec3f    center(0,0,0);
 static Vec3f        up(0,1,0);
 
+static double drawing_scale = 1;
 static double viewport_aperture = height * 0.816;
 static double viewport_aspect = 1;
 
@@ -131,6 +132,8 @@ static void readConfig(const std::string filename) {
     //~ std::cout << width;
     //~ std::cout << height;
 
+    inipp::extract(ini.sections["CONFIG"]["scale"], drawing_scale);
+
     inipp::extract(ini.sections["CONFIG"]["aperture"], viewport_aperture);
     inipp::extract(ini.sections["CONFIG"]["aspect"], viewport_aspect);
 
@@ -157,6 +160,9 @@ static void readConfig(const std::string filename) {
 
 int main (int argc, const char * const * argv, const char * const * envp) {
     readConfig("config.ini");
+    width = round(width * drawing_scale);
+    height = round(height * drawing_scale);
+    viewport_aperture = viewport_aperture * drawing_scale;
 
     float *zbuffer = new float[width*height];
     for (int i=width*height; i--; zbuffer[i] = -std::numeric_limits<float>::max());
