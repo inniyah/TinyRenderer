@@ -23,10 +23,13 @@ Model *model = NULL;
 static int width  = 350;
 static int height = 600;
 
-Vec3f light_dir(1,3,2);
-Vec3f       eye(3,3,3);
-Vec3f    center(0,0,0);
-Vec3f        up(0,1,0);
+static Vec3f light_dir(1,3,2);
+static Vec3f       eye(3,3,3);
+static Vec3f    center(0,0,0);
+static Vec3f        up(0,1,0);
+
+static double viewport_aperture = height * 0.816;
+static double viewport_aspect = 1;
 
 struct Shader : public IShader {
     mat<2,3,float> varying_uv;  // triangle uv coordinates, written by the vertex shader, read by the fragment shader
@@ -120,6 +123,9 @@ static void readConfig(const std::string filename) {
     //~ std::cout << width;
     //~ std::cout << height;
 
+    inipp::extract(ini.sections["CONFIG"]["aperture"], viewport_aperture);
+    inipp::extract(ini.sections["CONFIG"]["aspect"], viewport_aspect);
+
     std::string str;
 
     inipp::extract(ini.sections["CONFIG"]["light_dir"], str);
@@ -147,8 +153,10 @@ int main (int argc, const char * const * argv, const char * const * envp) {
 
     Image frame(width, height, Image::RGBA);
     lookat(eye, center, up);
-    //~ viewport(width/8, height/8, width*3/4, height*3/4);
-    viewport(-width * 0.2, height * 0.092, height * 0.816, height * 0.816); // trial and error
+
+    double viewport_aspect_sq = sqrt(fabs(viewport_aspect));
+    viewport(-width * 0.2, height * 0.092, viewport_aperture * viewport_aspect_sq, viewport_aperture / viewport_aspect_sq);
+
     projection(-1.f/(eye-center).norm());
     light_dir = proj<3>((Projection*ModelView*embed<4>(light_dir, 0.f))).normalize();
 

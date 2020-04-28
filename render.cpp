@@ -12,12 +12,13 @@ IShader::~IShader() {}
 
 void viewport(int x, int y, int w, int h) {
     Viewport = Matrix::identity();
-    Viewport[0][3] = x+w/2.f;
-    Viewport[1][3] = y+h/2.f;
+    Viewport[0][3] = x + w/2.f;
+    Viewport[1][3] = y + h/2.f;
     Viewport[2][3] = 1.f;
     Viewport[0][0] = w/2.f;
     Viewport[1][1] = h/2.f;
     Viewport[2][2] = 0;
+	std::cout << Viewport;
 }
 
 void projection(float coeff) {
