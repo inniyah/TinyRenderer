@@ -8,6 +8,12 @@
 #include "obj_loader.h"
 
 bool Model::load_obj_model(std::string filename) {
+    std::string path = "./";
+    size_t slash = filename.find_last_of("/\\");
+    if (slash != std::string::npos) {
+        path = filename.substr(0, slash) + "/";
+    }
+
     // Initialize Loader
     objl::Loader Loader;
 
@@ -65,19 +71,24 @@ bool Model::load_obj_model(std::string filename) {
             }
 
             // Print Material
-            //~ std::cout << "Material: " << curMesh.MeshMaterial.name << "\n";
-            //~ std::cout << "Ambient Color: " << curMesh.MeshMaterial.Ka.X << ", " << curMesh.MeshMaterial.Ka.Y << ", " << curMesh.MeshMaterial.Ka.Z << "\n";
-            //~ std::cout << "Diffuse Color: " << curMesh.MeshMaterial.Kd.X << ", " << curMesh.MeshMaterial.Kd.Y << ", " << curMesh.MeshMaterial.Kd.Z << "\n";
-            //~ std::cout << "Specular Color: " << curMesh.MeshMaterial.Ks.X << ", " << curMesh.MeshMaterial.Ks.Y << ", " << curMesh.MeshMaterial.Ks.Z << "\n";
-            //~ std::cout << "Specular Exponent: " << curMesh.MeshMaterial.Ns << "\n";
-            //~ std::cout << "Optical Density: " << curMesh.MeshMaterial.Ni << "\n";
-            //~ std::cout << "Dissolve: " << curMesh.MeshMaterial.d << "\n";
-            //~ std::cout << "Illumination: " << curMesh.MeshMaterial.illum << "\n";
-            //~ std::cout << "Ambient Texture Map: " << curMesh.MeshMaterial.map_Ka << "\n";
-            //~ std::cout << "Diffuse Texture Map: " << curMesh.MeshMaterial.map_Kd << "\n";
-            //~ std::cout << "Specular Texture Map: " << curMesh.MeshMaterial.map_Ks << "\n";
-            //~ std::cout << "Alpha Texture Map: " << curMesh.MeshMaterial.map_d << "\n";
-            //~ std::cout << "Bump Map: " << curMesh.MeshMaterial.map_bump << "\n";
+            std::cout << "Material: " << curMesh.MeshMaterial.name << "\n";
+            std::cout << "Ambient Color: " << curMesh.MeshMaterial.Ka.X << ", " << curMesh.MeshMaterial.Ka.Y << ", " << curMesh.MeshMaterial.Ka.Z << "\n";
+            std::cout << "Diffuse Color: " << curMesh.MeshMaterial.Kd.X << ", " << curMesh.MeshMaterial.Kd.Y << ", " << curMesh.MeshMaterial.Kd.Z << "\n";
+            std::cout << "Specular Color: " << curMesh.MeshMaterial.Ks.X << ", " << curMesh.MeshMaterial.Ks.Y << ", " << curMesh.MeshMaterial.Ks.Z << "\n";
+            std::cout << "Specular Exponent: " << curMesh.MeshMaterial.Ns << "\n";
+            std::cout << "Optical Density: " << curMesh.MeshMaterial.Ni << "\n";
+            std::cout << "Dissolve: " << curMesh.MeshMaterial.d << "\n";
+            std::cout << "Illumination: " << curMesh.MeshMaterial.illum << "\n";
+            std::cout << "Ambient Texture Map: " << curMesh.MeshMaterial.map_Ka << "\n";
+            std::cout << "Diffuse Texture Map: " << curMesh.MeshMaterial.map_Kd << "\n";
+            std::cout << "Specular Color Texture Map: " << curMesh.MeshMaterial.map_Ks << "\n";
+            std::cout << "Specular Highlight Texture Map: " << curMesh.MeshMaterial.map_Ns << "\n";
+            std::cout << "Alpha Texture Map: " << curMesh.MeshMaterial.map_d << "\n";
+            std::cout << "Bump Map: " << curMesh.MeshMaterial.map_bump << "\n";
+
+            load_texture(path, curMesh.MeshMaterial.map_Kd, m_diffusemap, ImageColor(128, 128, 128));
+            load_texture(path, "", m_normalmap, ImageColor(255, 128, 128));
+            //~ load_texture(filename, "_spec.png", m_specularmap);
 
             // Leave a space to separate from the next mesh
             std::cout << "\n";
@@ -89,11 +100,7 @@ bool Model::load_obj_model(std::string filename) {
 
 Model::Model(const char *filename) {
     load_obj_model(filename);
-
-    std::cerr << "# v# " << m_verts.size() << " f# "  << m_faces.size() << " vt# " << m_uv.size() << " vn# " << m_norms.size() << std::endl;
-    load_texture(filename, ".png", m_diffusemap, ImageColor(128, 128, 128));
-    load_texture(filename, "_nm_tangent.png", m_normalmap, ImageColor(255, 128, 128));
-    //~ load_texture(filename, "_spec.png", m_specularmap);
+    //~ std::cerr << "# v# " << m_verts.size() << " f# "  << m_faces.size() << " vt# " << m_uv.size() << " vn# " << m_norms.size() << std::endl;
 }
 
 
@@ -121,12 +128,11 @@ Vec3f Model::vert(int iface, int nthvert) {
     return m_verts[m_faces[iface][nthvert][0]];
 }
 
-void Model::load_texture(std::string filename, const char *suffix, Image &img, const ImageColor color) {
-    std::string texfile(filename);
-    size_t dot = texfile.find_last_of(".");
-    if (dot != std::string::npos) {
-        texfile = texfile.substr(0,dot) + std::string(suffix);
-        bool read_from_file = img.read_from_file(texfile.c_str());
+void Model::load_texture(std::string path, std::string texfile, Image &img, const ImageColor color) {
+    if (!texfile.length()) {
+        img.set_to_color(color);
+    } else {
+        bool read_from_file = img.read_from_file((path + texfile).c_str());
         std::cerr << "texture file " << texfile << " loading " << (read_from_file ? "ok" : "failed") << std::endl;
         if (!read_from_file) img.set_to_color(color);
         img.flip_vertically();

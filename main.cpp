@@ -31,6 +31,8 @@ static Vec3f        up(0,1,0);
 static double viewport_aperture = height * 0.816;
 static double viewport_aspect = 1;
 
+// Rendering
+
 struct Shader : public IShader {
     mat<2,3,float> varying_uv;  // triangle uv coordinates, written by the vertex shader, read by the fragment shader
     mat<4,3,float> varying_tri; // triangle coordinates (clip coordinates), written by VS, read by FS
@@ -73,6 +75,8 @@ struct Shader : public IShader {
         return false;
     }
 };
+
+// Configuration
 
 static bool endsWith(const std::string& s, const std::string& suffix) {
     return s.size() >= suffix.size() && s.substr(s.size() - suffix.size()) == suffix;
@@ -144,6 +148,8 @@ static void readConfig(const std::string filename) {
     parseVec3f(str, up);
     std::cout << up;
 }
+
+// Main program
 
 int main (int argc, const char * const * argv, const char * const * envp) {
     readConfig("config.ini");
