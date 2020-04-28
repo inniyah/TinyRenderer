@@ -1,0 +1,4 @@
+newmtl Material
+map_Kd body_diffuse.tga
+map_Bump body_normal.tga
+map_Ks body_specular.tga

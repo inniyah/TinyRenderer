@@ -1,0 +1,4 @@
+newmtl Material
+map_Kd diablo3_pose_diffuse.tga
+map_Bump diablo3_pose_normal.tga
+map_Ks diablo3_pose_specular.tga

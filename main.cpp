@@ -40,17 +40,21 @@ struct Shader : public IShader {
     mat<3,3,float> ndc_tri;     // triangle in normalized device coordinates
 
     virtual Vec4f vertex(int iface, int nthvert) {
-        varying_uv.set_col(nthvert, model->uv(iface, nthvert));
-        varying_nrm.set_col(nthvert, proj<3>((Projection*ModelView).invert_transpose()*embed<4>(model->normal(iface, nthvert), 0.f)));
-        Vec4f gl_Vertex = Projection*ModelView*embed<4>(model->vert(iface, nthvert));
+        varying_uv.set_col(nthvert,
+            model->uv(iface, nthvert));
+        varying_nrm.set_col(nthvert,
+            proj<3>((Projection * ModelView).invert_transpose() * embed<4>(model->normal(iface, nthvert), 0.f)));
+
+        Vec4f gl_Vertex = Projection * ModelView * embed<4>(model->vert(iface, nthvert));
         varying_tri.set_col(nthvert, gl_Vertex);
         ndc_tri.set_col(nthvert, proj<3>(gl_Vertex/gl_Vertex[3]));
+
         return gl_Vertex;
     }
 
     virtual bool fragment(Vec3f bar, ImageColor &color) {
-        Vec3f bn = (varying_nrm*bar).normalize();
-        Vec2f uv = varying_uv*bar;
+        Vec3f bn = (varying_nrm * bar).normalize();
+        Vec2f uv = varying_uv * bar;
 
         mat<3,3,float> A;
         A[0] = ndc_tri.col(1) - ndc_tri.col(0);

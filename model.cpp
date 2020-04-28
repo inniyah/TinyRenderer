@@ -87,7 +87,7 @@ bool Model::load_obj_model(std::string filename) {
             std::cout << "Bump Map: " << curMesh.MeshMaterial.map_bump << "\n";
 
             load_texture(path, curMesh.MeshMaterial.map_Kd, m_diffusemap, ImageColor(128, 128, 128));
-            load_texture(path, "", m_normalmap, ImageColor(255, 128, 128));
+            load_texture(path, curMesh.MeshMaterial.map_bump, m_normalmap, ImageColor(128, 128, 255));
             //~ load_texture(filename, "_spec.png", m_specularmap);
 
             // Leave a space to separate from the next mesh
@@ -149,7 +149,7 @@ Vec3f Model::normal(Vec2f uvf) {
     ImageColor c = m_normalmap.get(uv[0], uv[1]);
     Vec3f res;
     for (int i=0; i<3; i++) {
-        res[2-i] = (float)c[i]/255.f*2.f - 1.f;
+        res[i] = (float)c[i]/255.f*2.f - 1.f;
     }
     return res;
 }
