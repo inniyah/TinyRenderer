@@ -74,7 +74,7 @@ struct Shader : public IShader {
         Vec3f n = (B*model->normal(uv)).normalize();
 
         float diff = std::max(0.f, n*light_dir);
-        color = model->diffuse(uv)*diff;
+        color = model->diffuse(uv) * diff;
 
         return false;
     }
@@ -165,7 +165,7 @@ int main (int argc, const char * const * argv, const char * const * envp) {
     lookat(eye, center, up);
 
     double viewport_aspect_sq = sqrt(fabs(viewport_aspect));
-    viewport(-width * 0.2, height * 0.092, viewport_aperture * viewport_aspect_sq, viewport_aperture / viewport_aspect_sq);
+    viewport(-width * 0.2012, width * 0.16, viewport_aperture * viewport_aspect_sq, viewport_aperture / viewport_aspect_sq);
 
     projection(-1.f/(eye-center).norm());
     light_dir = proj<3>((Projection*ModelView*embed<4>(light_dir, 0.f))).normalize();
