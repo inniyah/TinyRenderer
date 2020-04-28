@@ -22,6 +22,8 @@
  * 3. This notice may not be removed or altered from any source distribution.
  */
 
+#pragma once
+
 #ifndef MODEL_H_F3EC37E2_8881_11EA_90FB_10FEED04CD1C
 #define MODEL_H_F3EC37E2_8881_11EA_90FB_10FEED04CD1C
 

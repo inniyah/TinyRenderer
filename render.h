@@ -22,6 +22,8 @@
  * 3. This notice may not be removed or altered from any source distribution.
  */
 
+#pragma once
+
 #ifndef RENDER_H_F3EC3828_8881_11EA_90FC_10FEED04CD1C
 #define RENDER_H_F3EC3828_8881_11EA_90FC_10FEED04CD1C
 

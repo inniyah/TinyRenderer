@@ -2,19 +2,30 @@
 #include <limits>
 #include <iostream>
 
+#include "inipp.h"
 #include "image.h"
 #include "model.h"
 #include "geometry.h"
 #include "render.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+double str2dbl(const char *s);
+
+#ifdef __cplusplus
+}
+#endif
+
 Model *model = NULL;
 
-const int width  = 350;
-const int height = 600;
+static int width  = 350;
+static int height = 600;
 
 Vec3f light_dir(1,3,2);
-Vec3f       eye(1e12,1e12,1e12);
-Vec3f    center(0.5,1.0,0.5);
+Vec3f       eye(3,3,3);
+Vec3f    center(0,0,0);
 Vec3f        up(0,1,0);
 
 struct Shader : public IShader {
@@ -60,11 +71,76 @@ struct Shader : public IShader {
     }
 };
 
-int main(int argc, char** argv) {
-    if (2>argc) {
-        std::cerr << "Usage: " << argv[0] << " obj/model.obj" << std::endl;
-        return 1;
+static bool endsWith(const std::string& s, const std::string& suffix) {
+    return s.size() >= suffix.size() && s.substr(s.size() - suffix.size()) == suffix;
+}
+
+static std::vector<std::string> split(const std::string & s, const std::string & delimiter, const bool & removeEmptyEntries = false) {
+    std::vector<std::string> tokens;
+
+    for (size_t start = 0, end; start < s.length(); start = end + delimiter.length()) {
+         size_t position = s.find(delimiter, start);
+         end = position != std::string::npos ? position : s.length();
+
+         std::string token = s.substr(start, end - start);
+         if (!removeEmptyEntries || !token.empty()) {
+             tokens.push_back(token);
+         }
     }
+
+    if (!removeEmptyEntries && (s.empty() || endsWith(s, delimiter))) {
+        tokens.push_back("");
+    }
+
+    return tokens;
+}
+
+static bool parseVec3f(const std::string str, Vec3f & v) {
+    if (str.length()) {
+        std::vector<std::string> subs = split(str, ",", false);
+        int i = 0;
+        for (auto & sub : subs) {
+            v[i++] = str2dbl(sub.c_str());
+        }
+    }
+    return true;
+}
+
+static void readConfig(const std::string filename) {
+    inipp::Ini<char> ini;
+    std::ifstream is(filename);
+    ini.parse(is);
+    std::cout << "config file:" << std::endl;
+    ini.default_section(ini.sections["CONFIG"]);
+    ini.interpolate();
+    ini.generate(std::cout);
+
+    inipp::extract(ini.sections["CONFIG"]["width"], width);
+    inipp::extract(ini.sections["CONFIG"]["height"], height);
+    //~ std::cout << width;
+    //~ std::cout << height;
+
+    std::string str;
+
+    inipp::extract(ini.sections["CONFIG"]["light_dir"], str);
+    parseVec3f(str, light_dir);
+    std::cout << light_dir;
+
+    inipp::extract(ini.sections["CONFIG"]["eye_pos"], str);
+    parseVec3f(str, eye);
+    std::cout << eye;
+
+    inipp::extract(ini.sections["CONFIG"]["center_pos"], str);
+    parseVec3f(str, center);
+    std::cout << center;
+
+    inipp::extract(ini.sections["CONFIG"]["up_dir"], str);
+    parseVec3f(str, up);
+    std::cout << up;
+}
+
+int main (int argc, const char * const * argv, const char * const * envp) {
+    readConfig("config.ini");
 
     float *zbuffer = new float[width*height];
     for (int i=width*height; i--; zbuffer[i] = -std::numeric_limits<float>::max());
@@ -91,6 +167,6 @@ int main(int argc, char** argv) {
     frame.write_to_file("framebuffer.png");
 
     delete [] zbuffer;
-    return 0;
+    return EXIT_SUCCESS;
 }
 

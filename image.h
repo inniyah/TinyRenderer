@@ -22,6 +22,8 @@
  * 3. This notice may not be removed or altered from any source distribution.
  */
 
+#pragma once
+
 #ifndef IMAGE_H_F3EC386E_8881_11EA_90FD_10FEED04CD1C
 #define IMAGE_H_F3EC386E_8881_11EA_90FD_10FEED04CD1C
 

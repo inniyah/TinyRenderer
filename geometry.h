@@ -22,6 +22,8 @@
  * 3. This notice may not be removed or altered from any source distribution.
  */
 
+#pragma once
+
 #ifndef GEOMETRY_H_F3EC360C_8881_11EA_90FA_10FEED04CD1C
 #define GEOMETRY_H_F3EC360C_8881_11EA_90FA_10FEED04CD1C
 

@@ -2,7 +2,13 @@ PROGRAM=TinyRenderer
 
 all: $(PROGRAM)
 
-OBJS = geometry.o  model.o  render.o  image.o  main.o
+OBJS = \
+	geometry.o \
+	model.o \
+	render.o \
+	image.o \
+	str2dbl.o \
+	main.o
 
 PKG_CONFIG=
 
@@ -16,7 +22,7 @@ PKG_CONFIG_LDFLAGS=`pkg-config --libs-only-L $(PKG_CONFIG)`
 PKG_CONFIG_LIBS=`pkg-config --libs-only-l $(PKG_CONFIG)`
 endif
 
-CFLAGS= -O2 -g -Wall -pedantic -Wno-unused-variable -Wno-unused-value -Wno-unused-but-set-variable
+CFLAGS= -O2 -g -Wall -pedantic -Wno-unused-variable -Wno-unused-value -Wno-unused-function -Wno-unused-but-set-variable
 LDFLAGS= -Wl,--as-needed -Wl,--no-undefined -Wl,--no-allow-shlib-undefined
 INCS=
 LIBS=
