@@ -172,3 +172,11 @@ Vec3f Model::normal(int iface, int nthvert) {
     return m_norms[idx].normalize();
 }
 
+void Model::modify(const Matrix & m) {
+	for(auto & v: m_verts) {
+		v = proj<3>(m * embed<4>(v));
+	}
+	for(auto & n: m_norms) {
+		n = proj<3>(m * embed<4>(n));
+	}
+}

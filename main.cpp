@@ -192,11 +192,18 @@ static inline bool file_exists(const std::string & name) {
 
 // Main program
 
-int main (int argc, const char * * argv, const char * * envp) {
-    dsr::Argument_helper ah;
+int main (int argc, const char * const * argv, const char * const * envp) {
+    dsr::ArgumentHelper ah;
+
+    bool overwrite_output = false, mirror_x = false, mirror_z = false, mirror_xz = false;
+    Matrix mod_matrix = Matrix::identity();
 
     ah.new_string("input_filename.obj", "The name of the input file", input_filename);
     ah.new_string("output_filename.png", "The name of the output file", output_filename);
+    ah.new_flag('w', "overwrite", "Overwrite output", overwrite_output);
+    ah.new_flag('x', "xmirror", "Mirror slong the X axis", mirror_x);
+    ah.new_flag('z', "zmirror", "Mirror slong the Z axis", mirror_z);
+    ah.new_flag('d', "dmirror", "Mirror slong the diagonal XZ axis", mirror_xz);
 
     ah.set_description("Tiny Renderer");
     ah.set_author("Miriam Ruiz <miriam@debian.org>");
@@ -206,7 +213,7 @@ int main (int argc, const char * * argv, const char * * envp) {
     ah.process(argc, argv);
     ah.write_values(std::cout);
 
-    if (file_exists(output_filename)) {
+    if (!overwrite_output && file_exists(output_filename)) {
         return EXIT_FAILURE;
     }
 
@@ -236,8 +243,30 @@ int main (int argc, const char * * argv, const char * * envp) {
     light2_dir = proj<3>((Projection*ModelView*embed<4>(light2_dir, 0.f))).normalize();
     light3_dir = proj<3>((Projection*ModelView*embed<4>(light3_dir, 0.f))).normalize();
 
+    if (mirror_x) {
+        mod_matrix[0][0] = -1;
+        mod_matrix[0][3] = 1;
+    }
+
+    if (mirror_z) {
+        mod_matrix[2][2] = -1;
+        mod_matrix[2][3] = 1;
+    }
+
+    if (mirror_x) {
+        mod_matrix[0][0] = -1;
+        mod_matrix[0][3] = 1;
+    }
+
+    if (mirror_xz) {
+        mod_matrix[0][2] = mod_matrix[0][0];
+        mod_matrix[2][0] = mod_matrix[2][2];
+        mod_matrix[0][0] = mod_matrix[2][2] = 0;
+    }
+
     if (true) {
         model = new Model(input_filename.c_str());
+        model->modify(mod_matrix);
         Shader shader;
         for (int i=0; i<model->nfaces(); i++) {
             for (int j=0; j<3; j++) {

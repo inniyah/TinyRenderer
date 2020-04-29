@@ -37,9 +37,9 @@ namespace dsr{
     extern bool verbose, VERBOSE;
 
 
-    class Argument_helper{
+    class ArgumentHelper{
     private:
-        class Argument_target;
+        class ArgumentTarget;
 
 
         class FlagTarget;
@@ -53,7 +53,7 @@ namespace dsr{
         class StringVectorTarget;
 
     public:
-        Argument_helper();
+        ArgumentHelper();
         void new_flag(char key, const char *long_name, const char *description,bool &dest);
 
         void new_string( const char *arg_description, const char *description, std::string &dest);
@@ -136,17 +136,20 @@ namespace dsr{
 
 
         void process(int argc, const char **argv);
+        void process(int argc, const char *const *argv){
+            process(argc, const_cast<const char **>(argv));
+        }
         void process(int argc, char **argv){
             process(argc, const_cast<const char **>(argv));
         }
         void write_usage(std::ostream &out) const;
         void write_values(std::ostream &out) const;
 
-        ~Argument_helper();
+        ~ArgumentHelper();
     protected:
-        typedef std::map<char, Argument_target*> SMap;
-        typedef std::map<std::string, Argument_target*> LMap;
-        typedef std::vector<Argument_target*> UVect;
+        typedef std::map<char, ArgumentTarget*> SMap;
+        typedef std::map<std::string, ArgumentTarget*> LMap;
+        typedef std::vector<ArgumentTarget*> UVect;
         // A map from short names to arguments.
         SMap short_names_;
         // A map from long names to arguments.
@@ -158,19 +161,19 @@ namespace dsr{
         float version_;
         bool seen_end_named_;
         // List of unnamed arguments
-        std::vector<Argument_target*> unnamed_arguments_;
-        std::vector<Argument_target*> optional_unnamed_arguments_;
-        std::vector<Argument_target*> all_arguments_;
+        std::vector<ArgumentTarget*> unnamed_arguments_;
+        std::vector<ArgumentTarget*> optional_unnamed_arguments_;
+        std::vector<ArgumentTarget*> all_arguments_;
         std::string extra_arguments_descr_;
         std::string extra_arguments_arg_descr_;
         std::vector<std::string> *extra_arguments_;
-        std::vector<Argument_target*>::iterator current_unnamed_;
-        std::vector<Argument_target*>::iterator current_optional_unnamed_;
-        void new_argument_target(Argument_target*);
+        std::vector<ArgumentTarget*>::iterator current_unnamed_;
+        std::vector<ArgumentTarget*>::iterator current_optional_unnamed_;
+        void new_argument_target(ArgumentTarget*);
         void handle_error() const;
     private:
-        Argument_helper(const Argument_helper &){};
-        const Argument_helper& operator=(const Argument_helper &){return *this;}
+        ArgumentHelper(const ArgumentHelper &){};
+        const ArgumentHelper& operator=(const ArgumentHelper &){return *this;}
     };
 
 }
