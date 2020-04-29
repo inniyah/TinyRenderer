@@ -10,15 +10,17 @@ Matrix Projection;
 
 IShader::~IShader() {}
 
-void viewport(int x, int y, int w, int h) {
+void viewport(int center_x, int center_y, int zoom_x, int zoom_y) {
     Viewport = Matrix::identity();
-    Viewport[0][3] = x + w/2.f;
-    Viewport[1][3] = y + h/2.f;
+
+    Viewport[0][3] = center_x;
+    Viewport[1][3] = center_y;
     Viewport[2][3] = 1.f;
-    Viewport[0][0] = w/2.f;
-    Viewport[1][1] = h/2.f;
+    Viewport[0][0] = zoom_x;
+    Viewport[1][1] = zoom_y;
     Viewport[2][2] = 0;
-	std::cout << Viewport;
+
+    std::cout << std::endl << Viewport << std::endl;
 }
 
 void projection(float coeff) {

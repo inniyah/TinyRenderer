@@ -33,7 +33,7 @@
 extern Matrix ModelView;
 extern Matrix Projection;
 
-void viewport(int x, int y, int w, int h);
+void viewport(int center_x, int center_y, int zoom_x, int zoom_y);
 void projection(float coeff=0.f); // coeff = -1/c
 void lookat(Vec3f eye, Vec3f center, Vec3f up);
 

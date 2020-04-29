@@ -29,8 +29,10 @@ static Vec3f    center(0,0,0);
 static Vec3f        up(0,1,0);
 
 static double drawing_scale = 1;
-static double viewport_aperture = height * 0.816;
+static double viewport_zoom = 100;
 static double viewport_aspect = 1;
+static double viewport_offset_x = 0;
+static double viewport_offset_y = 0;
 
 // Rendering
 
@@ -134,8 +136,10 @@ static void readConfig(const std::string filename) {
 
     inipp::extract(ini.sections["CONFIG"]["scale"], drawing_scale);
 
-    inipp::extract(ini.sections["CONFIG"]["aperture"], viewport_aperture);
+    inipp::extract(ini.sections["CONFIG"]["zoom"], viewport_zoom);
     inipp::extract(ini.sections["CONFIG"]["aspect"], viewport_aspect);
+    inipp::extract(ini.sections["CONFIG"]["offset_x"], viewport_offset_x);
+    inipp::extract(ini.sections["CONFIG"]["offset_y"], viewport_offset_y);
 
     std::string str;
 
@@ -162,7 +166,9 @@ int main (int argc, const char * const * argv, const char * const * envp) {
     readConfig("config.ini");
     width = round(width * drawing_scale);
     height = round(height * drawing_scale);
-    viewport_aperture = viewport_aperture * drawing_scale;
+    viewport_zoom = viewport_zoom * drawing_scale;
+    viewport_offset_x = viewport_offset_x * drawing_scale;
+    viewport_offset_y = viewport_offset_y * drawing_scale;
 
     float *zbuffer = new float[width*height];
     for (int i=width*height; i--; zbuffer[i] = -std::numeric_limits<float>::max());
@@ -171,7 +177,12 @@ int main (int argc, const char * const * argv, const char * const * envp) {
     lookat(eye, center, up);
 
     double viewport_aspect_sq = sqrt(fabs(viewport_aspect));
-    viewport(-width * 0.2012, width * 0.16, viewport_aperture * viewport_aspect_sq, viewport_aperture / viewport_aspect_sq);
+    viewport(
+        width / 2. + viewport_offset_x,
+        height / 2. + viewport_offset_y,
+        viewport_zoom * viewport_aspect_sq,
+        viewport_zoom / viewport_aspect_sq
+    );
 
     projection(-1.f/(eye-center).norm());
     light_dir = proj<3>((Projection*ModelView*embed<4>(light_dir, 0.f))).normalize();
