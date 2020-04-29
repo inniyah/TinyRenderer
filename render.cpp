@@ -20,7 +20,7 @@ void viewport(int center_x, int center_y, int zoom_x, int zoom_y) {
     Viewport[1][1] = zoom_y;
     Viewport[2][2] = 0;
 
-    std::cout << std::endl << Viewport << std::endl;
+    //~ std::cout << std::endl << Viewport << std::endl;
 }
 
 void projection(float coeff) {

@@ -162,27 +162,27 @@ static void readConfig(const std::string filename) {
 
     inipp::extract(ini.sections["CONFIG"]["light1_dir"], str);
     parseVec3f(str, light1_dir);
-    std::cout << light1_dir;
+    //~ std::cout << light1_dir;
 
     inipp::extract(ini.sections["CONFIG"]["light2_dir"], str);
     parseVec3f(str, light2_dir);
-    std::cout << light2_dir;
+    //~ std::cout << light2_dir;
 
     inipp::extract(ini.sections["CONFIG"]["light3_dir"], str);
     parseVec3f(str, light3_dir);
-    std::cout << light3_dir;
+    //~ std::cout << light3_dir;
 
     inipp::extract(ini.sections["CONFIG"]["eye_pos"], str);
     parseVec3f(str, eye);
-    std::cout << eye;
+    //~ std::cout << eye;
 
     inipp::extract(ini.sections["CONFIG"]["center_pos"], str);
     parseVec3f(str, center);
-    std::cout << center;
+    //~ std::cout << center;
 
     inipp::extract(ini.sections["CONFIG"]["up_dir"], str);
     parseVec3f(str, up);
-    std::cout << up;
+    //~ std::cout << up;
 }
 
 static inline bool file_exists(const std::string & name) {
@@ -193,6 +193,15 @@ static inline bool file_exists(const std::string & name) {
 // Main program
 
 int main (int argc, const char * const * argv, const char * const * envp) {
+    std::string prgpath = "./";
+    std::string prgname = std::string(argv[0]);
+    size_t slash = prgname.find_last_of("/\\");
+    if (slash != std::string::npos) {
+        prgpath = prgname.substr(0, slash) + "/";
+    }
+
+    std::string cfgfile = prgpath + "/config.ini";
+
     dsr::ArgumentHelper ah;
 
     bool overwrite_output = false, mirror_x = false, mirror_z = false, mirror_xz = false;
@@ -217,7 +226,7 @@ int main (int argc, const char * const * argv, const char * const * envp) {
         return EXIT_FAILURE;
     }
 
-    readConfig("config.ini");
+    readConfig(cfgfile);
     width = round(width * drawing_scale);
     height = round(height * drawing_scale);
     viewport_zoom = viewport_zoom * drawing_scale;
