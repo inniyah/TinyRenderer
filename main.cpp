@@ -1,12 +1,15 @@
 #include <vector>
 #include <limits>
 #include <iostream>
+#include <sys/stat.h>
 
-#include "inipp.h"
 #include "image.h"
 #include "model.h"
 #include "geometry.h"
 #include "render.h"
+
+#include "inipp.h"
+#include "arghelper.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -17,6 +20,7 @@ double str2dbl(const char *s);
 #ifdef __cplusplus
 }
 #endif
+
 
 Model *model = NULL;
 
@@ -36,6 +40,8 @@ static double viewport_zoom = 100;
 static double viewport_aspect = 1;
 static double viewport_offset_x = 0;
 static double viewport_offset_y = 0;
+
+static std::string input_filename, output_filename;
 
 // Rendering
 
@@ -179,9 +185,32 @@ static void readConfig(const std::string filename) {
     std::cout << up;
 }
 
+static inline bool file_exists(const std::string & name) {
+    struct stat buffer;   
+    return (stat (name.c_str(), &buffer) == 0); 
+}
+
 // Main program
 
-int main (int argc, const char * const * argv, const char * const * envp) {
+int main (int argc, const char * * argv, const char * * envp) {
+    dsr::Argument_helper ah;
+
+    ah.new_string("input_filename.obj", "The name of the input file", input_filename);
+    ah.new_string("output_filename.png", "The name of the output file", output_filename);
+
+    //ARGUMENT_HELPER_BASICS(ah);
+    ah.set_description("Tiny Renderer");
+    ah.set_author("Miriam Ruiz <miriam@debian.org>");
+    ah.set_version(0.1f);
+    ah.set_build_date(__DATE__);
+
+    ah.process(argc, argv);
+    ah.write_values(std::cout);
+
+    if (file_exists(output_filename)) {
+        return EXIT_FAILURE;
+    }
+
     readConfig("config.ini");
     width = round(width * drawing_scale);
     height = round(height * drawing_scale);
@@ -208,8 +237,8 @@ int main (int argc, const char * const * argv, const char * const * envp) {
     light2_dir = proj<3>((Projection*ModelView*embed<4>(light2_dir, 0.f))).normalize();
     light3_dir = proj<3>((Projection*ModelView*embed<4>(light3_dir, 0.f))).normalize();
 
-    for (int m=1; m<argc; m++) {
-        model = new Model(argv[m]);
+    if (true) {
+        model = new Model(input_filename.c_str());
         Shader shader;
         for (int i=0; i<model->nfaces(); i++) {
             for (int j=0; j<3; j++) {
@@ -219,8 +248,9 @@ int main (int argc, const char * const * argv, const char * const * envp) {
         }
         delete model;
     }
+
     frame.flip_vertically(); // to place the origin in the bottom left corner of the image
-    frame.write_to_file("framebuffer.png");
+    frame.write_to_file(output_filename.c_str());
 
     delete [] zbuffer;
     return EXIT_SUCCESS;

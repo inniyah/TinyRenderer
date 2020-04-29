@@ -9,6 +9,7 @@ OBJS = \
 	matrix.o \
 	image.o \
 	str2dbl.o \
+	arghelper.o \
 	main.o
 
 PKG_CONFIG=
