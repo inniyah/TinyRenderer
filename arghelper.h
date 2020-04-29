@@ -175,8 +175,4 @@ namespace dsr{
 
 }
 
-#define ARGUMENT_HELPER_BASICS(ah) ah.set_author("Daniel Russel, drussel@stanford.edu");\
-    ah.set_version(VERSION);\
-    ah.set_build_date(__DATE__);
-
 #endif // ARGHELPER_H_EF03189C_8A5F_11EA_ACC8_10FEED04CD1C

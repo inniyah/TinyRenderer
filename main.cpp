@@ -198,7 +198,6 @@ int main (int argc, const char * * argv, const char * * envp) {
     ah.new_string("input_filename.obj", "The name of the input file", input_filename);
     ah.new_string("output_filename.png", "The name of the output file", output_filename);
 
-    //ARGUMENT_HELPER_BASICS(ah);
     ah.set_description("Tiny Renderer");
     ah.set_author("Miriam Ruiz <miriam@debian.org>");
     ah.set_version(0.1f);
