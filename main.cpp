@@ -23,10 +23,13 @@ Model *model = NULL;
 static int width  = 350;
 static int height = 600;
 
-static Vec3f light_dir(1,3,2);
 static Vec3f       eye(3,3,3);
 static Vec3f    center(0,0,0);
 static Vec3f        up(0,1,0);
+
+static Vec3f light1_dir(1,3,2);
+static Vec3f light2_dir(1,0,4);
+static Vec3f light3_dir(4,0,2);
 
 static double drawing_scale = 1;
 static double viewport_zoom = 100;
@@ -78,8 +81,11 @@ struct Shader : public IShader {
 
         Vec3f n = (B*model->normal(uv)).normalize();
 
-        float diff = std::max(0.f, n*light_dir);
-        diff = diff;
+        float diff_light1 = std::max(0.f, n * light1_dir);
+        float diff_light2 = std::max(0.f, n * light2_dir);
+        float diff_light3 = std::max(0.f, n * light3_dir);
+
+        float diff = (diff_light1 + diff_light2 + diff_light3) * 0.5;
         ImageColor color_diff = (model->diffuse(uv) * diff);
 
         color.add(color_diff);
@@ -148,9 +154,17 @@ static void readConfig(const std::string filename) {
 
     std::string str;
 
-    inipp::extract(ini.sections["CONFIG"]["light_dir"], str);
-    parseVec3f(str, light_dir);
-    std::cout << light_dir;
+    inipp::extract(ini.sections["CONFIG"]["light1_dir"], str);
+    parseVec3f(str, light1_dir);
+    std::cout << light1_dir;
+
+    inipp::extract(ini.sections["CONFIG"]["light2_dir"], str);
+    parseVec3f(str, light2_dir);
+    std::cout << light2_dir;
+
+    inipp::extract(ini.sections["CONFIG"]["light3_dir"], str);
+    parseVec3f(str, light3_dir);
+    std::cout << light3_dir;
 
     inipp::extract(ini.sections["CONFIG"]["eye_pos"], str);
     parseVec3f(str, eye);
@@ -190,7 +204,9 @@ int main (int argc, const char * const * argv, const char * const * envp) {
     );
 
     projection(-1.f/(eye-center).norm());
-    light_dir = proj<3>((Projection*ModelView*embed<4>(light_dir, 0.f))).normalize();
+    light1_dir = proj<3>((Projection*ModelView*embed<4>(light1_dir, 0.f))).normalize();
+    light2_dir = proj<3>((Projection*ModelView*embed<4>(light2_dir, 0.f))).normalize();
+    light3_dir = proj<3>((Projection*ModelView*embed<4>(light3_dir, 0.f))).normalize();
 
     for (int m=1; m<argc; m++) {
         model = new Model(argv[m]);
