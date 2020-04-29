@@ -56,6 +56,8 @@ struct Shader : public IShader {
     }
 
     virtual bool fragment(Vec3f bar, ImageColor &color) {
+        color = model->ambient();
+
         Vec3f bn = (varying_nrm * bar).normalize();
         Vec2f uv = varying_uv * bar;
 
@@ -77,7 +79,10 @@ struct Shader : public IShader {
         Vec3f n = (B*model->normal(uv)).normalize();
 
         float diff = std::max(0.f, n*light_dir);
-        color = model->diffuse(uv) * diff;
+        diff = diff;
+        ImageColor color_diff = (model->diffuse(uv) * diff);
+
+        color.add(color_diff);
 
         return false;
     }

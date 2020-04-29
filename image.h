@@ -34,7 +34,9 @@ struct ImageColor {
     unsigned char bytespp;
 
     ImageColor() : rgba(), bytespp(1) {
-        for (int i=0; i<4; i++) rgba[i] = 0;
+        for (int i=0; i<4; i++) {
+            rgba[i] = 0;
+        }
     }
 
     ImageColor(unsigned char R, unsigned char G, unsigned char B, unsigned char A=255) : rgba(), bytespp(4) {
@@ -45,10 +47,11 @@ struct ImageColor {
     }
 
     ImageColor(unsigned char v) : rgba(), bytespp(1) {
-        for (int i=0; i<4; i++) rgba[i] = 0;
+        for (int i=0; i<4; i++) {
+            rgba[i] = 0;
+        }
         rgba[0] = v;
     }
-
 
     ImageColor(const unsigned char *p, unsigned char bpp) : rgba(), bytespp(bpp) {
         for (int i=0; i<(int)bpp; i++) {
@@ -63,10 +66,20 @@ struct ImageColor {
 
     ImageColor operator *(float intensity) const {
         ImageColor res = *this;
-        intensity = (intensity>1.f?1.f:(intensity<0.f?0.f:intensity));
-        for (int i=0; i<4; i++) res.rgba[i] = rgba[i]*intensity;
+        intensity = ( intensity > 1.f ? 1.f : (intensity < 0.f ? 0.f : intensity) );
+        for (int i=0; i<4; i++) {
+            res.rgba[i] = rgba[i]*intensity;
+        }
         return res;
     }
+
+    void add(ImageColor color) {
+        for (int i=0; i<3; i++) {
+            int c = int(rgba[i]) + int(color.rgba[i]);
+            rgba[i] = (c < 256 ? c : 255);
+        }
+    }
+
 };
 
 class Image {

@@ -98,7 +98,7 @@ bool Model::load_obj_model(std::string filename) {
 
 }
 
-Model::Model(const char *filename) {
+Model::Model(const char *filename) : m_ambient(255 / 8, 249 / 8, 253 / 8) {
     load_obj_model(filename);
     //~ std::cerr << "# v# " << m_verts.size() << " f# "  << m_faces.size() << " vt# " << m_uv.size() << " vn# " << m_norms.size() << std::endl;
 }
@@ -137,6 +137,10 @@ void Model::load_texture(std::string path, std::string texfile, Image &img, cons
         if (!read_from_file) img.set_to_color(color);
         img.flip_vertically();
     }
+}
+
+ImageColor Model::ambient() {
+    return m_ambient;
 }
 
 ImageColor Model::diffuse(Vec2f uvf) {

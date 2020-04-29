@@ -42,6 +42,8 @@ private:
     Image m_diffusemap;
     Image m_normalmap;
     //~ Image m_specularmap;
+    ImageColor m_ambient;
+
     void load_texture(std::string path, std::string texfile, Image &img, const ImageColor color);
     bool load_obj_model(std::string filename);
 
@@ -55,6 +57,7 @@ public:
     Vec3f vert(int i);
     Vec3f vert(int iface, int nthvert);
     Vec2f uv(int iface, int nthvert);
+    ImageColor ambient();
     ImageColor diffuse(Vec2f uv);
     //~ float specular(Vec2f uv);
     std::vector<int> face(int idx);
