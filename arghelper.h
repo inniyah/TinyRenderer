@@ -54,7 +54,7 @@ namespace dsr{
 
     public:
         ArgumentHelper();
-        void new_flag(char key, const char *long_name, const char *description,bool &dest);
+        void new_flag(char key, const char *long_name, const char *description, bool &dest);
 
         void new_string( const char *arg_description, const char *description, std::string &dest);
         void new_named_string(char key, const char *long_name,
