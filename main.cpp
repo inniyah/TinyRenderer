@@ -3,6 +3,7 @@
 #include <iostream>
 #include <cmath>
 #include <sys/stat.h>
+#include <libgen.h>
 
 #include "image.h"
 #include "model.h"
@@ -238,6 +239,18 @@ static inline bool file_exists(const std::string & name) {
     return (stat (name.c_str(), &buffer) == 0); 
 }
 
+static int mkpath(const char * dir, mode_t mode = S_IRWXU) {
+    struct stat sb;
+    if (!dir) {
+        errno = EINVAL;
+        return 1;
+    }
+    if (!stat(dir, &sb))
+        return 0;
+    mkpath(dirname(strdupa(dir)), mode);
+    return mkdir(dir, mode);
+}
+
 // Main program
 
 int main (int argc, const char * const * argv, const char * const * envp) {
@@ -349,6 +362,13 @@ int main (int argc, const char * const * argv, const char * const * envp) {
         }
         delete model;
     }
+
+    std::string output_path = "./";
+    size_t output_last_slash = output_filename.find_last_of("/\\");
+    if (output_last_slash != std::string::npos) {
+        output_path = output_filename.substr(0, output_last_slash) + "/";
+    }
+    mkpath(output_path.c_str());
 
     frame.flip_vertically(); // to place the origin in the bottom left corner of the image
     frame.write_to_file(output_filename.c_str());
