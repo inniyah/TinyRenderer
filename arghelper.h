@@ -33,7 +33,7 @@
 #include <string>
 #include <string.h>
 
-namespace dsr{
+namespace dsr {
     extern bool verbose, VERBOSE;
 
 
@@ -176,6 +176,6 @@ namespace dsr{
         const ArgumentHelper& operator=(const ArgumentHelper &){return *this;}
     };
 
-}
+} // namespace dsr
 
 #endif // ARGHELPER_H_EF03189C_8A5F_11EA_ACC8_10FEED04CD1C

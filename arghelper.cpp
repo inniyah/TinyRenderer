@@ -737,7 +737,8 @@ namespace dsr {
     write_usage(std::cerr);
     exit(1);
   }
-}
+
+} // namespace dsr
 
 
 // Code Example:

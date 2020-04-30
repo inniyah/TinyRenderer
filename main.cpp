@@ -145,10 +145,14 @@ static void readConfig(const std::string filename) {
     inipp::Ini<char> ini;
     std::ifstream is(filename);
     ini.parse(is);
-    std::cout << "config file:" << std::endl;
+
     ini.default_section(ini.sections["CONFIG"]);
     ini.interpolate();
-    ini.generate(std::cout);
+
+    if (dsr::verbose) {
+        std::cout << std::endl << "Config file:" << std::endl << std::endl;
+        ini.generate(std::cout);
+    }
 
     inipp::extract(ini.sections["CONFIG"]["width"], width);
     inipp::extract(ini.sections["CONFIG"]["height"], height);
@@ -227,7 +231,8 @@ int main (int argc, const char * const * argv, const char * const * envp) {
     ah.set_build_date(__DATE__);
 
     ah.process(argc, argv);
-    ah.write_values(std::cout);
+    if (dsr::verbose)
+        ah.write_values(std::cout);
 
     if (!overwrite_output && file_exists(output_filename)) {
         return EXIT_FAILURE;
