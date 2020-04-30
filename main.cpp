@@ -300,26 +300,28 @@ int main (int argc, const char * const * argv, const char * const * envp) {
     frame.flip_vertically(); // to place the origin in the bottom left corner of the image
     frame.write_to_file(output_filename.c_str());
 
+    float zbuffer_min = INFINITY;
+    float zbuffer_max = -INFINITY;
+    for (int i = 0; i < (width * height); i++) {
+        if (zbuffer[i] > zbuffer_max) zbuffer_max = zbuffer[i];
+        if (zbuffer[i] < zbuffer_min) zbuffer_min = zbuffer[i];
+    }
+    std::cout << "Final Z-Buffer limits: " << zbuffer_min << " to " << zbuffer_max << std::endl;
+
+#if 0
     if (zbuffer_output_filename.length()) {
         FILE* fp = fopen(zbuffer_output_filename.c_str(), "wb");
         unsigned long nbytes = width * height;
         unsigned char * data = new unsigned char[nbytes];
 
-        float zb_min = INFINITY; 
-        float zb_max = -INFINITY; 
         for (unsigned int i = 0; i < nbytes; i++) {
-            if (zbuffer[i] > zb_max) zb_max = zbuffer[i];
-            if (zbuffer[i] < zb_min) zb_min = zbuffer[i];
-        }
-        std::cout << zb_min << " < " << zb_max << std::endl;
-
-        for (unsigned int i = 0; i < nbytes; i++) {
-            data[i] = static_cast<unsigned char>( 255. * (zbuffer[i] - zb_min) / (zb_max - zb_min) );
+            data[i] = static_cast<unsigned char>( 255. * (zbuffer[i] - zbuffer_min) / (zbuffer_max - zbuffer_min) );
         }
         svpng(fp, width, height, data, 0, 1);
         fclose(fp);
         if (data) delete [] data;
     }
+#endif
 
     delete [] zbuffer;
     return EXIT_SUCCESS;
