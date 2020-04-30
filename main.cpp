@@ -1,8 +1,8 @@
 #include <vector>
 #include <limits>
 #include <iostream>
+#include <cmath>
 #include <sys/stat.h>
-#include <math.h>
 
 #include "image.h"
 #include "model.h"

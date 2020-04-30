@@ -44,6 +44,7 @@ bool Model::load_obj_model(std::string filename) {
                 Vec3f v(curMesh.Vertices[j].Position.X, curMesh.Vertices[j].Position.Y, curMesh.Vertices[j].Position.Z);
                 m_verts.push_back(v);
                 Vec3f n(curMesh.Vertices[j].Normal.X, curMesh.Vertices[j].Normal.Y, curMesh.Vertices[j].Normal.Z);
+                n = n.normalize();
                 m_norms.push_back(n);
                 Vec2f uv(curMesh.Vertices[j].TextureCoordinate.X, curMesh.Vertices[j].TextureCoordinate.Y);
                 m_uv.push_back(uv);
@@ -176,7 +177,8 @@ void Model::modify(const Matrix & m) {
 	for(auto & v: m_verts) {
 		v = proj<3>(m * embed<4>(v));
 	}
+	Matrix mn = m.invert_transpose();
 	for(auto & n: m_norms) {
-		n = proj<3>(m * embed<4>(n));
+		n = proj<3>(mn * embed<4>(n));
 	}
 }
