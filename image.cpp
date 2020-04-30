@@ -9,6 +9,7 @@
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
 
+#define SVPNG_LINKAGE static
 #include "save_png.h"
 
 Image::Image() : data(NULL), width(0), height(0), bytespp(0) {}

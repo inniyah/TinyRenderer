@@ -2,6 +2,7 @@
 #include <limits>
 #include <iostream>
 #include <sys/stat.h>
+#include <math.h>
 
 #include "image.h"
 #include "model.h"
@@ -10,6 +11,9 @@
 
 #include "inipp.h"
 #include "arghelper.h"
+
+#define SVPNG_LINKAGE static
+#include "save_png.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -200,6 +204,8 @@ int main (int argc, const char * const * argv, const char * const * envp) {
         prgpath = prgname.substr(0, slash) + "/";
     }
 
+    std::string zbuffer_output_filename;
+
     std::string cfgfile = prgpath + "/config.ini";
 
     dsr::ArgumentHelper ah;
@@ -213,6 +219,7 @@ int main (int argc, const char * const * argv, const char * const * envp) {
     ah.new_flag('x', "xmirror", "Mirror slong the X axis", mirror_x);
     ah.new_flag('z', "zmirror", "Mirror slong the Z axis", mirror_z);
     ah.new_flag('d', "dmirror", "Mirror slong the diagonal XZ axis", mirror_xz);
+    ah.new_named_string('Z', "zbuffer", "zbuffer_output.png", "Dump the zbuffer", zbuffer_output_filename);
 
     ah.set_description("Tiny Renderer");
     ah.set_author("Miriam Ruiz <miriam@debian.org>");
@@ -223,6 +230,10 @@ int main (int argc, const char * const * argv, const char * const * envp) {
     ah.write_values(std::cout);
 
     if (!overwrite_output && file_exists(output_filename)) {
+        return EXIT_FAILURE;
+    }
+
+    if (!overwrite_output && zbuffer_output_filename.length() && file_exists(zbuffer_output_filename)) {
         return EXIT_FAILURE;
     }
 
@@ -288,6 +299,27 @@ int main (int argc, const char * const * argv, const char * const * envp) {
 
     frame.flip_vertically(); // to place the origin in the bottom left corner of the image
     frame.write_to_file(output_filename.c_str());
+
+    if (zbuffer_output_filename.length()) {
+        FILE* fp = fopen(zbuffer_output_filename.c_str(), "wb");
+        unsigned long nbytes = width * height;
+        unsigned char * data = new unsigned char[nbytes];
+
+        float zb_min = INFINITY; 
+        float zb_max = -INFINITY; 
+        for (unsigned int i = 0; i < nbytes; i++) {
+            if (zbuffer[i] > zb_max) zb_max = zbuffer[i];
+            if (zbuffer[i] < zb_min) zb_min = zbuffer[i];
+        }
+        std::cout << zb_min << " < " << zb_max << std::endl;
+
+        for (unsigned int i = 0; i < nbytes; i++) {
+            data[i] = static_cast<unsigned char>( 255. * (zbuffer[i] - zb_min) / (zb_max - zb_min) );
+        }
+        svpng(fp, width, height, data, 0, 1);
+        fclose(fp);
+        if (data) delete [] data;
+    }
 
     delete [] zbuffer;
     return EXIT_SUCCESS;
