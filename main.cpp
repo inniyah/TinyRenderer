@@ -47,6 +47,46 @@ static double viewport_offset_y = 0;
 
 static std::string input_filename, output_filename;
 
+// Matrices
+
+Matrix translationMatrix(Vec3f v) {
+    Matrix Tr = Matrix::identity();
+    Tr[0][3] = v.x;
+    Tr[1][3] = v.y;
+    Tr[2][3] = v.z;
+    return Tr;
+}
+
+Matrix zoomMatrix(float factor) {
+    Matrix Z = Matrix::identity();
+    Z[0][0] = Z[1][1] = Z[2][2] = factor;
+    return Z;
+}
+
+Matrix xRotationMatrix(float cosangle, float sinangle) {
+    Matrix R = Matrix::identity();
+    R[1][1] = R[2][2] = cosangle;
+    R[1][2] = -sinangle;
+    R[2][1] =  sinangle;
+    return R;
+}
+
+Matrix yRotationMatrix(float cosangle, float sinangle) {
+    Matrix R = Matrix::identity();
+    R[0][0] = R[2][2] = cosangle;
+    R[0][2] =  sinangle;
+    R[2][0] = -sinangle;
+    return R;
+}
+
+Matrix zRotationMatrix(float cosangle, float sinangle) {
+    Matrix R = Matrix::identity();
+    R[0][0] = R[1][1] = cosangle;
+    R[0][1] = -sinangle;
+    R[1][0] =  sinangle;
+    return R;
+}
+
 // Rendering
 
 struct Shader : public IShader {
@@ -215,14 +255,16 @@ int main (int argc, const char * const * argv, const char * const * envp) {
     dsr::ArgumentHelper ah;
 
     bool overwrite_output = false, mirror_x = false, mirror_z = false, mirror_xz = false;
+    double angle_y = 0;
     Matrix mod_matrix = Matrix::identity();
 
     ah.new_string("input_filename.obj", "The name of the input file", input_filename);
     ah.new_string("output_filename.png", "The name of the output file", output_filename);
     ah.new_flag('w', "overwrite", "Overwrite output", overwrite_output);
-    ah.new_flag('x', "xmirror", "Mirror slong the X axis", mirror_x);
-    ah.new_flag('z', "zmirror", "Mirror slong the Z axis", mirror_z);
-    ah.new_flag('d', "dmirror", "Mirror slong the diagonal XZ axis", mirror_xz);
+    ah.new_flag('x', "xmirror", "Mirror along the X plane", mirror_x);
+    ah.new_flag('z', "zmirror", "Mirror along the Z plane", mirror_z);
+    ah.new_flag('d', "dmirror", "Mirror along the diagonal XZ plane", mirror_xz);
+    ah.new_named_double('a', "angle", "angle in degrees", "Angle to rotate around the Y axis in degrees", angle_y);
     ah.new_named_string('Z', "zbuffer", "zbuffer_output.png", "Dump the zbuffer", zbuffer_output_filename);
 
     ah.set_description("Tiny Renderer");
@@ -288,6 +330,12 @@ int main (int argc, const char * const * argv, const char * const * envp) {
         mod_matrix[2][0] = mod_matrix[2][2];
         mod_matrix[0][0] = mod_matrix[2][2] = 0;
     }
+
+    mod_matrix = mod_matrix
+        * translationMatrix(Vec3f(.5, 0, .5))
+        * yRotationMatrix(cos(angle_y * M_PI / 180), sin(angle_y * M_PI / 180))
+        * translationMatrix(Vec3f(-.5, 0, -.5));
+    std::cout << mod_matrix;
 
     if (true) {
         model = new Model(input_filename.c_str());

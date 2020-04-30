@@ -6,7 +6,6 @@ OBJS = \
 	geometry.o \
 	model.o \
 	render.o \
-	matrix.o \
 	image.o \
 	str2dbl.o \
 	arghelper.o \
