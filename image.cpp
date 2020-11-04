@@ -156,6 +156,20 @@ bool Image::scale(int w, int h) {
     return true;
 }
 
+bool Image::modify_opacity(double opacity) {
+    if (bytespp != RGBA) {
+        return false;
+    }
+    for (int i=0; i<width; i++) {
+        for (int j=0; j<height; j++) {
+            ImageColor c = get(i, j);
+            c.rgba[3] = (unsigned char)(double(c.rgba[3]) * opacity);
+            set(i, j, c);
+        }
+    }
+    return true;
+}
+
 void Image::set_to_color(const ImageColor color) {
     if (data) delete [] data;
     width = height = 1;
@@ -177,7 +191,7 @@ bool Image::read_from_file(const char *filename) {
     if (!pixel_data || (bytespp!=GRAYSCALE && bytespp!=RGB && bytespp!=RGBA)) {
         return false;
     }
-    puts("\n");
+    //~ puts("\n");
 
     unsigned long nbytes = bytespp * width * height;
     data = new unsigned char[nbytes];

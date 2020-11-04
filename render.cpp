@@ -56,7 +56,7 @@ Vec3f barycentric(Vec2f A, Vec2f B, Vec2f C, Vec2f P) {
     return Vec3f(-1,1,1); // in this case generate negative coordinates, it will be thrown away by the rasterizator
 }
 
-void triangle(mat<4,3,float> &clipc, IShader &shader, Image &image, float *zbuffer) {
+void triangle(mat<4,3,float> &clipc, IShader &shader, Image &image, float *zbuffer, bool reverse_pov, Vec3f *normals_buffer) {
     mat<3,4,float> pts  = (Viewport*clipc).transpose(); // transposed to ease access to each of the points
     mat<3,2,float> pts2;
     for (int i=0; i<3; i++) pts2[i] = proj<2>(pts[i]/pts[i][3]);
@@ -72,16 +72,19 @@ void triangle(mat<4,3,float> &clipc, IShader &shader, Image &image, float *zbuff
     }
     Vec2i P;
     ImageColor color;
+    Vec3f normal;
     for (P.x=bboxmin.x; P.x<=bboxmax.x; P.x++) {
         for (P.y=bboxmin.y; P.y<=bboxmax.y; P.y++) {
             Vec3f bc_screen  = barycentric(pts2[0], pts2[1], pts2[2], P);
             Vec3f bc_clip    = Vec3f(bc_screen.x/pts[0][3], bc_screen.y/pts[1][3], bc_screen.z/pts[2][3]);
             bc_clip = bc_clip/(bc_clip.x+bc_clip.y+bc_clip.z);
             float frag_depth = clipc[2]*bc_clip;
+            if (reverse_pov) frag_depth = -frag_depth;
             if (bc_screen.x<0 || bc_screen.y<0 || bc_screen.z<0 || zbuffer[P.x+P.y*image.get_width()]>frag_depth) continue;
-            bool discard = shader.fragment(bc_clip, color);
+            bool discard = shader.fragment(bc_clip, color, normal);
             if (!discard) {
                 zbuffer[P.x+P.y*image.get_width()] = frag_depth;
+                if (normals_buffer) normals_buffer[P.x+P.y*image.get_width()] = normal;
                 image.set(P.x, P.y, color);
             }
         }

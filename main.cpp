@@ -40,6 +40,7 @@ static Vec3f light1_dir(1,3,2);
 static Vec3f light2_dir(1,0,4);
 static Vec3f light3_dir(4,0,2);
 
+static double global_opacity = 1;
 static double drawing_scale = 1;
 static double viewport_zoom = 100;
 static double viewport_aspect = 1;
@@ -109,7 +110,7 @@ struct Shader : public IShader {
         return gl_Vertex;
     }
 
-    virtual bool fragment(Vec3f bar, ImageColor &color) {
+    virtual bool fragment(Vec3f bar, ImageColor &color, Vec3f &normal) {
         color = model->ambient();
 
         Vec3f bn = (varying_nrm * bar).normalize();
@@ -141,6 +142,7 @@ struct Shader : public IShader {
 
         color.add(color_diff);
 
+        normal = n;
         return false;
     }
 };
@@ -267,7 +269,8 @@ int main (int argc, const char * const * argv, const char * const * envp) {
 
     dsr::ArgumentHelper ah;
 
-    bool overwrite_output = false, mirror_x = false, mirror_z = false, mirror_xz = false;
+    bool overwrite_output = false, reverse_pov = false, invert_normals = false;
+    bool mirror_x = false, mirror_z = false, mirror_xz = false;
     double angle_y = 0;
     Matrix mod_matrix = Matrix::identity();
 
@@ -277,7 +280,11 @@ int main (int argc, const char * const * argv, const char * const * envp) {
     ah.new_flag('x', "xmirror", "Mirror along the X plane", mirror_x);
     ah.new_flag('z', "zmirror", "Mirror along the Z plane", mirror_z);
     ah.new_flag('d', "dmirror", "Mirror along the diagonal XZ plane", mirror_xz);
+    ah.new_flag('r', "reverse", "Reverse point of view", reverse_pov);
+    ah.new_flag('i', "invertnormals", "Invert normals", invert_normals);
     ah.new_named_double('a', "angle", "angle in degrees", "Angle to rotate around the Y axis in degrees", angle_y);
+    ah.new_named_double('o', "opacity", "opacity (0.0 - 1.0)", "opacity between 0.0 (transparent) and 1.0 (opaque)", global_opacity);
+    ah.new_named_string('C', "config", "config.ini", "Use a certain config file", cfgfile);
     ah.new_named_string('Z', "zbuffer", "zbuffer_output.png", "Dump the zbuffer", zbuffer_output_filename);
 
     ah.set_description("Tiny Renderer");
@@ -297,6 +304,9 @@ int main (int argc, const char * const * argv, const char * const * envp) {
         return EXIT_FAILURE;
     }
 
+    if (global_opacity < 0.0) global_opacity = 0.0;
+    if (global_opacity > 1.0) global_opacity = 1.0;
+
     readConfig(cfgfile);
     width = round(width * drawing_scale);
     height = round(height * drawing_scale);
@@ -306,6 +316,8 @@ int main (int argc, const char * const * argv, const char * const * envp) {
 
     float *zbuffer = new float[width*height];
     for (int i=width*height; i--; zbuffer[i] = -std::numeric_limits<float>::max());
+
+    Vec3f *normals_buffer = new Vec3f[width*height];
 
     Image frame(width, height, Image::RGBA);
     lookat(eye, center, up);
@@ -353,15 +365,18 @@ int main (int argc, const char * const * argv, const char * const * envp) {
     if (true) {
         model = new Model(input_filename.c_str());
         model->modify(mod_matrix);
+        if (invert_normals) model->invert_normals();
         Shader shader;
         for (int i=0; i<model->nfaces(); i++) {
             for (int j=0; j<3; j++) {
                 shader.vertex(i, j);
             }
-            triangle(shader.varying_tri, shader, frame, zbuffer);
+            triangle(shader.varying_tri, shader, frame, zbuffer, reverse_pov, normals_buffer);
         }
         delete model;
     }
+
+    if (global_opacity < 0.99) frame.modify_opacity(global_opacity);
 
     std::string output_path = "./";
     size_t output_last_slash = output_filename.find_last_of("/\\");
@@ -369,6 +384,49 @@ int main (int argc, const char * const * argv, const char * const * envp) {
         output_path = output_filename.substr(0, output_last_slash) + "/";
     }
     mkpath(output_path.c_str());
+
+    ImageColor black(0, 0, 0);
+    for (int y = 0; y < frame.get_height(); ++y) {
+        for (int x = 0; x < frame.get_width(); ++x) {
+            float z = zbuffer[width * y + x];
+            Vec3f & n = normals_buffer[width * y + x];
+            if (n[0] || n[1] || n[1]) {
+                if (x > 0) {
+                    if (n*normals_buffer[width * y + (x - 1)] < 0.1)
+                        frame.set(x, y, black);
+                    if (fabs(zbuffer[width * y + (x - 1)] - z) > 0.15)
+                        frame.set(x, y, black);
+                } else frame.set(x, y, black);
+                if (x < frame.get_width() - 1) {
+                    if (n*normals_buffer[width * y + (x + 1)] < 0.1)
+                        frame.set(x, y, black);
+                    if (fabs(zbuffer[width * y + (x + 1)] - z) > 0.15)
+                        frame.set(x, y, black);
+                } else frame.set(x, y, black);
+                if (y > 0) {
+                    if (n*normals_buffer[width * (y - 1) + x] < 0.1)
+                        frame.set(x, y, black);
+                    if (fabs(zbuffer[width * (y - 1) + x] - z) > 0.15)
+                        frame.set(x, y, black);
+                } else frame.set(x, y, black);
+                if (y < frame.get_height() - 1) {
+                    if (n*normals_buffer[width * (y + 1) + x] < 0.1)
+                        frame.set(x, y, black);
+                    if (fabs(zbuffer[width * (y + 1) + x] - z) > 0.15)
+                        frame.set(x, y, black);
+                } else frame.set(x, y, black);
+            } else {
+                if (x > 0 && normals_buffer[width * y + (x-1)].norm() > 0.1)
+                    frame.set(x, y, black);
+                if (x < frame.get_width() - 1 && normals_buffer[width * y + (x+1)].norm() > 0.1)
+                    frame.set(x, y, black);
+                if (y > 0 && normals_buffer[width * (y-1) + x].norm() > 0.1)
+                    frame.set(x, y, black);
+                if (y < frame.get_height() - 1 && normals_buffer[width * (y+1) + x].norm() > 0.1)
+                    frame.set(x, y, black);
+            }
+        }
+    }
 
     frame.flip_vertically(); // to place the origin in the bottom left corner of the image
     frame.write_to_file(output_filename.c_str());
@@ -396,6 +454,7 @@ int main (int argc, const char * const * argv, const char * const * envp) {
     }
 #endif
 
+    delete [] normals_buffer;
     delete [] zbuffer;
     return EXIT_SUCCESS;
 }

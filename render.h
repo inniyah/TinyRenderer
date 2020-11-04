@@ -40,9 +40,9 @@ void lookat(Vec3f eye, Vec3f center, Vec3f up);
 struct IShader {
     virtual ~IShader();
     virtual Vec4f vertex(int iface, int nthvert) = 0;
-    virtual bool fragment(Vec3f bar, ImageColor &color) = 0;
+    virtual bool fragment(Vec3f bar, ImageColor &color, Vec3f &normal) = 0;
 };
 
-void triangle(mat<4,3,float> &pts, IShader &shader, Image &image, float *zbuffer);
+void triangle(mat<4,3,float> &pts, IShader &shader, Image &image, float *zbuffer, bool reverse_pov = false, Vec3f *normals_buffer = nullptr);
 
 #endif // RENDER_H_F3EC3828_8881_11EA_90FC_10FEED04CD1C

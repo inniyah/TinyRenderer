@@ -62,6 +62,7 @@ public:
     //~ float specular(Vec2f uv);
     std::vector<int> face(int idx);
     void modify(const Matrix & m);
+    void invert_normals();
 };
 
 #endif // MODEL_H_F3EC37E2_8881_11EA_90FB_10FEED04CD1C

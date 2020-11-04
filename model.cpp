@@ -145,13 +145,17 @@ ImageColor Model::ambient() {
 }
 
 ImageColor Model::diffuse(Vec2f uvf) {
-    Vec2i uv(uvf[0]*m_diffusemap.get_width(), uvf[1]*m_diffusemap.get_height());
+    float u = uvf[0] - floor(uvf[0]);
+    float v = uvf[1] - floor(uvf[1]);
+    Vec2i uv(u * m_diffusemap.get_width(), v * m_diffusemap.get_height());
     return m_diffusemap.get(uv[0], uv[1]);
 }
 
 Vec3f Model::normal(Vec2f uvf) {
-    Vec2i uv(uvf[0]*m_normalmap.get_width(), uvf[1]*m_normalmap.get_height());
-    ImageColor c = m_normalmap.get(uv[0], uv[1]);
+    float u = uvf[0] - floor(uvf[0]);
+    float v = uvf[1] - floor(uvf[1]);
+    Vec2i uv(u * m_normalmap.get_width(), v * m_normalmap.get_height());
+    ImageColor c = m_normalmap.get(u, v);
     Vec3f res;
     for (int i=0; i<3; i++) {
         res[i] = (float)c[i]/255.f*2.f - 1.f;
@@ -180,5 +184,13 @@ void Model::modify(const Matrix & m) {
 	Matrix mn = m.invert_transpose();
 	for(auto & n: m_norms) {
 		n = proj<3>(mn * embed<4>(n));
+	}
+}
+
+void Model::invert_normals() {
+	for(auto & n: m_norms) {
+		n[0] = -n[0];
+		n[1] = -n[1];
+		n[2] = -n[2];
 	}
 }

@@ -106,6 +106,7 @@ public:
     bool flip_horizontally();
     bool flip_vertically();
     bool scale(int w, int h);
+    bool modify_opacity(double opacity);
     ImageColor get(int x, int y);
     bool set(int x, int y, ImageColor &c);
     bool set(int x, int y, const ImageColor &c);
