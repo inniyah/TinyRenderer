@@ -24,13 +24,15 @@ PKG_CONFIG_LIBS=`pkg-config --libs-only-l $(PKG_CONFIG)`
 endif
 
 OPTFLAGS= -O2 -g
-CFLAGS= -Wall -pedantic -Wno-unused-variable -Wno-unused-value -Wno-unused-function -Wno-unused-but-set-variable
+CFLAGS= -MD -Wall -pedantic -Wno-unused-variable -Wno-unused-value -Wno-unused-function -Wno-unused-but-set-variable
 LDFLAGS= -Wl,--as-needed -Wl,--no-undefined -Wl,--no-allow-shlib-undefined
 INCS=
 LIBS=
 DEFS=
 CSTD=-std=c11
 CPPSTD=-std=c++11
+
+DEPS=$(OBJS:.o=.d)
 
 $(PROGRAM): $(OBJS)
 	g++ $(CPPSTD) $(CSTD) $(LDFLAGS) $(PKG_CONFIG_LDFLAGS) $+ -o $@ $(LIBS) $(PKG_CONFIG_LIBS)
@@ -45,5 +47,8 @@ clean:
 	@rm -fv *.o *.a *~
 	@rm -fv */*.o */*.a */*~
 	@rm -fv $(PROGRAM)
+	@rm -fv $(DEPS)
 
 cleanall: clean
+
+-include $(DEPS)
